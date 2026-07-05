@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momen Spesial Untukmu</title>
+    
+    <!-- Tailwind CSS untuk styling responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+        }
+        
+        .font-handwriting {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Animasi kursor berkedip untuk efek ketikan */
+        .blinking-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+            color: #ec4899; /* pink-500 */
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Animasi partikel melayang dari bawah ke atas */
+        @keyframes floatUp {
+            0% { 
+                transform: translateY(110vh) scale(0.5) rotate(0deg); 
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-20vh) scale(1.5) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
+        .particle {
+            position: absolute;
+            bottom: -10%;
+            animation-name: floatUp;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+            z-index: 10;
+            user-select: none;
+            pointer-events: none;
+            /* Membuat warna lebih cerah, kontras, dan lebih terlihat jelas dengan bayangan tebal */
+            filter: drop-shadow(0px 3px 8px rgba(255, 20, 147, 0.8)) contrast(1.5) saturate(2.5) brightness(1.2);
+        }
+
+        /* Gradient background animation */
+        .bg-animate {
+            background-size: 200% 200%;
+            animation: gradientMove 10s ease infinite;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-red-50 to-rose-200 bg-animate min-h-screen overflow-hidden text-gray-800 relative flex justify-center items-center">
+
+    <!-- Container untuk efek animasi partikel (Love, Bunga, dll) -->
+    <div id="particle-container" class="absolute inset-0 overflow-hidden pointer-events-none z-10"></div>
+
+    <!-- Div tersembunyi untuk YouTube Player -->
+    <div id="youtube-player-container" class="hidden">
+        <div id="player"></div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="relative z-20 w-full max-w-md px-6">
+
+        <!-- SCREEN 1: PILIHAN MUSIK -->
+        <div id="screen-music" class="flex flex-col items-center text-center transition-opacity duration-500 bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50">
+            <div class="text-5xl mb-4">🎵</div>
+            <h2 class="text-2xl font-bold text-pink-700 mb-2">Musik Latar?</h2>
+            <p class="text-gray-600 mb-8">Nyalakan musik agar suasananya lebih hangat dan syahdu.</p>
+            <div class="flex flex-col w-full gap-3">
+                <button onclick="handleMusicChoice(true)" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                    Ya, Nyalakan
+                </button>
+                <button onclick="handleMusicChoice(false)" class="w-full bg-white hover:bg-gray-50 text-pink-500 border-2 border-pink-200 font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105">
+                    Tidak, Terima Kasih
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: TOMBOL MULAI -->
+        <div id="screen-start" class="hidden opacity-0 flex-col items-center text-center transition-opacity duration-500 bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50">
+            <div class="text-5xl mb-4 animate-bounce">💌</div>
+            <h2 class="text-2xl font-bold text-pink-700 mb-6">Ada pesan untukmu...</h2>
+            <button onclick="startJourney()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 text-lg">
+                Buka Pesan
+            </button>
+        </div>
+
+        <!-- SCREEN 3: PESAN KETIKAN -->
+        <div id="screen-message" class="hidden opacity-0 flex-col items-center transition-opacity duration-500 w-full">
+            <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/60 w-full min-h-[300px] flex flex-col justify-between">
+                <div class="mb-6 text-left">
+                    <p id="typed-text" class="text-2xl font-handwriting text-gray-800 leading-relaxed blinking-cursor"></p>
+                </div>
+                <div class="mt-auto flex justify-end">
+                    <button id="btn-next" onclick="showCelebration()" class="hidden opacity-0 bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow-md transition-all duration-700 transform hover:-translate-y-1">
+                        Lanjut ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: FOTO & SELEBRASI -->
+        <div id="screen-celebration" class="hidden opacity-0 flex-col items-center transition-opacity duration-1000 w-full">
+            <div id="photo-card" class="bg-white p-4 pb-6 rounded-xl shadow-2xl transform transition-all duration-1000 opacity-0 translate-y-10 border border-pink-100 rotate-2 hover:rotate-0">
+                <!-- Gunakan placeholder atau ganti URL image di bawah ini dengan foto asli -->
+                <div class="relative w-full aspect-[4/5] rounded-lg overflow-hidden mb-5 shadow-inner">
+                    <img src="https://placehold.co/600x750/ffb6c1/ffffff?text=Momen+Kita" alt="Foto Spesial" class="w-full h-full object-cover">
+                    <!-- Ornamen Frame Overlay (Opsional) -->
+                    <div class="absolute inset-0 border-[8px] border-white/20 pointer-events-none rounded-lg"></div>
+                </div>
+                <p class="text-center font-handwriting text-3xl text-pink-700 font-bold px-2">
+                    Selamat Merayakan Hari Spesial Ini! ❤️
+                </p>
+                <p class="text-center text-sm text-gray-500 mt-2 font-medium">Semoga bahagia selalu.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- KONFIGURASI YOUTUBE PLAYER API ---
+        let ytPlayer;
+        let isMusicReady = false;
+        let playMusicIntent = false;
+
+        // Memuat YouTube IFrame API secara asynchronous
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // Fungsi ini akan dipanggil otomatis oleh API YouTube setelah selesai dimuat
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 'TUPNWkDfZp8', // Virgoun - Titik Balik di Hidupku
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'playsinline': 1,
+                    'rel': 0
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            isMusicReady = true;
+            console.log("YouTube Player Ready");
+            // Jika pengguna sudah memilih untuk memutar sebelum player siap
+            if (playMusicIntent) {
+                event.target.playVideo();
+            }
+        }
+
+        function onPlayerStateChange(event) {
+            // Bisa digunakan untuk loop jika lagu habis, tapi untuk durasi pendek mungkin tidak perlu
+        }
+
+        // --- NAVIGASI LAYAR ---
+        function switchScreen(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+            
+            // Fade out
+            hideEl.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                hideEl.classList.add('hidden');
+                showEl.classList.remove('hidden');
+                // Trigger reflow untuk animasi
+                void showEl.offsetWidth; 
+                // Fade in
+                showEl.classList.remove('opacity-0');
+            }, 500);
+        }
+
+        function handleMusicChoice(playMusic) {
+            if (playMusic) {
+                playMusicIntent = true;
+                if (isMusicReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                    // Memulai musik dari awal sesuai dengan permintaan
+                    ytPlayer.seekTo(0);
+                    ytPlayer.playVideo();
+                } else if (!isMusicReady) {
+                    console.log("Menunggu player siap...");
+                    // Player akan otomatis dimainkan di onPlayerReady jika intent true
+                }
+            }
+            switchScreen('screen-music', 'screen-start');
+        }
+
+        function startJourney() {
+            switchScreen('screen-start', 'screen-message');
+            // Jeda sedikit sebelum mulai mengetik agar transisi layar selesai
+            setTimeout(typeMessage, 800);
+        }
+
+        // --- EFEK TYPEWRITER ---
+        const messageText = "Halo...\nIni adalah pesan khusus untukmu.\nTerima kasih sudah menjadi bagian dari cerita yang indah ini.\nSemoga hari ini dan seterusnya, kamu selalu dikelilingi oleh kebahagiaan.\n\nEnjoy your moment! ✨";
+        const typingSpeed = 70; // Milidetik per karakter
+        let charIndex = 0;
+
+        function typeMessage() {
+            const el = document.getElementById('typed-text');
+            if (charIndex < messageText.length) {
+                let char = messageText.charAt(charIndex);
+                if (char === '\n') {
+                    el.innerHTML += '<br>';
+                } else {
+                    el.innerHTML += char;
+                }
+                charIndex++;
+                setTimeout(typeMessage, typingSpeed);
+            } else {
+                // Hentikan efek kursor berkedip
+                el.classList.remove('blinking-cursor');
+                // Tampilkan tombol lanjut
+                const btnNext = document.getElementById('btn-next');
+                btnNext.classList.remove('hidden');
+                void btnNext.offsetWidth;
+                btnNext.classList.remove('opacity-0');
+            }
+        }
+
+        // --- ANIMASI PARTIKEL (LOVE & BUNGA) ---
+        let particleInterval;
+
+        function startParticles(intensity) {
+            const container = document.getElementById('particle-container');
+            const emojis = ['❤️', '💖', '🌸', '✨', '🌹', '🦋'];
+            
+            // Intensitas: 'high' (sebelum foto muncul), 'low' (saat foto tampil)
+            const delay = intensity === 'high' ? 60 : 350; // Dipercepat agar lebih ramai
+
+            particleInterval = setInterval(() => {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Pilih emoji acak
+                particle.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Posisi X acak (0vw hingga 100vw)
+                particle.style.left = Math.random() * 100 + 'vw';
+                
+                // Ukuran acak (Diperbesar sedikit)
+                const size = Math.random() * 2 + 1.5; // 1.5rem - 3.5rem
+                particle.style.fontSize = size + 'rem';
+                
+                // Durasi animasi acak (kecepatan terbang)
+                const duration = Math.random() * 3 + 3; // 3s - 6s (sedikit lebih cepat)
+                particle.style.animationDuration = duration + 's';
+                
+                container.appendChild(particle);
+                
+                // Hapus elemen setelah animasi selesai agar memori tidak penuh
+                setTimeout(() => {
+                    particle.remove();
+                }, duration * 1000);
+
+            }, delay);
+        }
+
+        // --- TAHAP AKHIR: SELEBRASI ---
+        function showCelebration() {
+            switchScreen('screen-message', 'screen-celebration');
+            
+            // 1. Mulai animasi partikel secara intensif
+            startParticles('high');
+
+            // 2. Tunggu beberapa detik (animasi bergerak), lalu tampilkan foto
+            setTimeout(() => {
+                // Ubah intensitas partikel menjadi lebih santai
+                clearInterval(particleInterval);
+                startParticles('low');
+
+                // Animasi munculnya foto (fade in & slide up)
+                const photoCard = document.getElementById('photo-card');
+                photoCard.classList.remove('opacity-0', 'translate-y-10');
+            }, 2500); // Tunda 2.5 detik sebelum foto muncul
+        }
+    </script>
+</body>
+</html>
